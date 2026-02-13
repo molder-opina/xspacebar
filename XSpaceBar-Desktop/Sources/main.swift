@@ -1,40 +1,51 @@
 import AppKit
 
-class DesktopWindowController: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate {
     var mainWindow: NSWindow!
-    var urlTextField: NSTextField!
+    var tabButtons: [NSButton] = []
+    var tabViews: [NSView] = []
+    var currentTab = 0
+    
+    var inputField: NSTextField!
     var timerLabel: NSTextField!
-    var searchTextField: NSTextField!
+    var searchField: NSTextField!
     var searchResultsStack: NSStackView!
-    var statusIndicator: NSTextField!
+    var pathField: NSTextField!
+    var linksStack: NSStackView!
+    var savedLinks: [[String: String]] = []
+    var idField: NSTextField!
+    var historyStack: NSStackView!
+    var history: [[String: String]] = []
+    let historyLimit = 100
     
     var listenProcess: Process?
     var recordProcess: Process?
+    var downloadProcess: Process?
     var youtubeProcess: Process?
     var archiveProcess: Process?
     var startTime: Date?
     var timer: Timer?
-    var elapsedTime: String = "00:00:00"
-    var urlText: String = ""
     
     let scriptDir = "/Users/molder/projects/github-molder/spaces"
     let historyKey = "SpaceHistory"
-    let maxHistory = 10
+    let pathKey = "SavePath"
+    var savePath: String = ""
     
-    func applicationDidFinishLaunching(_ notification: Notification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        savePath = UserDefaults.standard.string(forKey: pathKey) ?? (NSHomeDirectory() + "/Downloads/x_spaces")
         setupWindow()
     }
     
     func setupWindow() {
-        mainWindow = NSWindow(contentRect: NSRect(x: 100, y: 100, width: 400, height: 580), 
+        mainWindow = NSWindow(contentRect: NSRect(x: 100, y: 100, width: 440, height: 680), 
                             styleMask: [.titled, .closable, .miniaturizable, .resizable],
                             backing: .buffered, defer: false)
-        mainWindow.title = "XSpaceBar - Desktop"
+        mainWindow.title = "XSpaceBar"
         mainWindow.backgroundColor = NSColor(hex: "0F1115")
         
         let contentView = mainWindow.contentView!
         contentView.wantsLayer = true
-        contentView.layer?.backgroundColor = NSColor(hex: "0F1115")?.cgColor ?? NSColor.black.cgColor
+        contentView.layer?.backgroundColor = NSColor(hex: "0F1115")?.cgColor
         
         let mainStack = NSStackView()
         mainStack.orientation = .vertical
@@ -52,136 +63,574 @@ class DesktopWindowController: NSObject, NSApplicationDelegate {
         // Header
         let headerStack = NSStackView()
         headerStack.orientation = .horizontal
-        headerStack.spacing = 12
         mainStack.addArrangedSubview(headerStack)
         
         let titleLabel = NSTextField(labelWithString: "XSpaceBar")
-        titleLabel.font = NSFont.systemFont(ofSize: 22, weight: .bold)
+        titleLabel.font = NSFont.systemFont(ofSize: 24, weight: .bold)
         titleLabel.textColor = .white
         headerStack.addArrangedSubview(titleLabel)
-        
         headerStack.addArrangedSubview(NSView())
         
-        statusIndicator = NSTextField(labelWithString: "●")
-        statusIndicator.font = NSFont.systemFont(ofSize: 18)
-        statusIndicator.textColor = .systemRed
+        let statusIndicator = NSView()
+        statusIndicator.wantsLayer = true
+        statusIndicator.layer?.backgroundColor = NSColor.systemGreen.cgColor
+        statusIndicator.layer?.cornerRadius = 6
+        statusIndicator.widthAnchor.constraint(equalToConstant: 12).isActive = true
+        statusIndicator.heightAnchor.constraint(equalToConstant: 12).isActive = true
         headerStack.addArrangedSubview(statusIndicator)
         
-        // URL Input - SAME DESIGN AS MENUBAR
-        let urlContainer = NSView()
-        urlContainer.wantsLayer = true
-        urlContainer.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
-        urlContainer.layer?.cornerRadius = 8
-        mainStack.addArrangedSubview(urlContainer)
+        // Input
+        let inputLabel = NSTextField(labelWithString: "Link del Space")
+        inputLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        inputLabel.textColor = .gray
+        mainStack.addArrangedSubview(inputLabel)
         
-        let urlPlaceholder = NSTextField(labelWithString: "Pega el link del Space...")
-        urlPlaceholder.font = NSFont.systemFont(ofSize: 12)
-        urlPlaceholder.textColor = NSColor.white.withAlphaComponent(0.4)
-        urlPlaceholder.translatesAutoresizingMaskIntoConstraints = false
-        urlContainer.addSubview(urlPlaceholder)
-        
-        urlTextField = NSTextField()
-        urlTextField.textColor = .white
-        urlTextField.backgroundColor = .clear
-        urlTextField.font = NSFont.systemFont(ofSize: 13)
-        urlTextField.delegate = self
-        urlTextField.placeholderString = "Pega el link del Space..."
-        urlTextField.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            urlPlaceholder.topAnchor.constraint(equalTo: urlContainer.topAnchor, constant: 10),
-            urlPlaceholder.leadingAnchor.constraint(equalTo: urlContainer.leadingAnchor, constant: 12),
-            
-            urlTextField.topAnchor.constraint(equalTo: urlContainer.topAnchor, constant: 10),
-            urlTextField.leadingAnchor.constraint(equalTo: urlContainer.leadingAnchor, constant: 12),
-            urlTextField.trailingAnchor.constraint(equalTo: urlContainer.trailingAnchor, constant: -12),
-            urlTextField.bottomAnchor.constraint(equalTo: urlContainer.bottomAnchor, constant: -10)
-        ])
-        
-        // Buttons row
-        let buttonsStack = NSStackView()
-        buttonsStack.orientation = .horizontal
-        buttonsStack.spacing = 10
-        buttonsStack.distribution = .fillEqually
-        mainStack.addArrangedSubview(buttonsStack)
-        
-        let listenBtn = createMainButton(title: "🔊 Escuchar", color: NSColor(hex: "22C55E")!)
-        listenBtn.tag = 1
-        listenBtn.target = self
-        listenBtn.action = #selector(mainButtonAction(_:))
-        
-        let recordBtn = createMainButton(title: "🎙️ Grabar", color: NSColor(hex: "EF4444")!)
-        recordBtn.tag = 2
-        recordBtn.target = self
-        recordBtn.action = #selector(mainButtonAction(_:))
-        
-        let youtubeBtn = createMainButton(title: "📺 YouTube", color: NSColor(hex: "DC2626")!)
-        youtubeBtn.tag = 3
-        youtubeBtn.target = self
-        youtubeBtn.action = #selector(mainButtonAction(_:))
-        
-        let archiveBtn = createMainButton(title: "🌐 Archive", color: NSColor(hex: "3B82F6")!)
-        archiveBtn.tag = 4
-        archiveBtn.target = self
-        archiveBtn.action = #selector(mainButtonAction(_:))
-        
-        buttonsStack.addArrangedSubview(listenBtn)
-        buttonsStack.addArrangedSubview(recordBtn)
-        buttonsStack.addArrangedSubview(youtubeBtn)
-        buttonsStack.addArrangedSubview(archiveBtn)
+        inputField = NSTextField()
+        inputField.textColor = NSColor(hex: "1F2937")!
+        inputField.backgroundColor = NSColor.white
+        inputField.font = NSFont.systemFont(ofSize: 14)
+        inputField.placeholderString = "https://x.com/i/spaces/..."
+        inputField.bezelStyle = .roundedBezel
+        mainStack.addArrangedSubview(inputField)
         
         // Timer
         timerLabel = NSTextField(labelWithString: "00:00:00")
-        timerLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 32, weight: .light)
+        timerLabel.font = NSFont.monospacedDigitSystemFont(ofSize: 44, weight: .light)
         timerLabel.textColor = .white
         timerLabel.alignment = .center
         mainStack.addArrangedSubview(timerLabel)
         
-        // Stop button
-        let stopBtn = NSButton(title: "⏹ DETENER TODO", target: self, action: #selector(stopAllAction))
-        stopBtn.bezelStyle = .rounded
-        stopBtn.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        stopBtn.wantsLayer = true
-        stopBtn.layer?.backgroundColor = NSColor(hex: "6B7280")!.cgColor
-        stopBtn.setButtonType(.momentaryPushIn)
-        stopBtn.isBordered = false
-        stopBtn.layer?.cornerRadius = 8
-        stopBtn.contentTintColor = .white
-        mainStack.addArrangedSubview(stopBtn)
+        // Tabs
+        let tabStack = NSStackView()
+        tabStack.orientation = .horizontal
+        tabStack.spacing = 8
+        tabStack.distribution = .fillEqually
+        mainStack.addArrangedSubview(tabStack)
         
-        // Search Section
-        let searchLabel = NSTextField(labelWithString: "🔍 Buscar Spaces")
-        searchLabel.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
-        searchLabel.textColor = .white
-        mainStack.addArrangedSubview(searchLabel)
+        let tabs = [
+            ("🔊", "Escuchar"),
+            ("🎙️", "Grabar"),
+            ("📥", "Descargar"),
+            ("📺", "YouTube"),
+            ("🌐", "Archive"),
+            ("🔗", "Links"),
+            ("📜", "History"),
+            ("🔍", "Buscar"),
+            ("⚙️", "Settings")
+        ]
         
-        let searchStack = NSStackView()
-        searchStack.orientation = .horizontal
-        searchStack.spacing = 10
-        mainStack.addArrangedSubview(searchStack)
+        for (index, (icon, name)) in tabs.enumerated() {
+            let btn = NSButton(title: "\(icon) \(name)", target: self, action: #selector(switchTab(_:)))
+            btn.tag = index
+            btn.bezelStyle = .rounded
+            btn.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+            btn.wantsLayer = true
+            btn.layer?.cornerRadius = 10
+            btn.isBordered = false
+            btn.contentTintColor = .white
+            
+            if index == 1 {
+                btn.layer?.backgroundColor = NSColor(hex: "EF4444")!.withAlphaComponent(0.3).cgColor
+            } else {
+                btn.layer?.backgroundColor = NSColor.clear.cgColor
+            }
+            
+            tabButtons.append(btn)
+            tabStack.addArrangedSubview(btn)
+        }
         
-        let searchInput = NSView()
-        searchInput.wantsLayer = true
-        searchInput.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
-        searchInput.layer?.cornerRadius = 8
-        searchStack.addArrangedSubview(searchInput)
+        // Content Area
+        let contentArea = NSView()
+        contentArea.wantsLayer = true
+        contentArea.layer?.backgroundColor = NSColor(white: 1, alpha: 0.03).cgColor
+        contentArea.layer?.cornerRadius = 12
+        mainStack.addArrangedSubview(contentArea)
         
-        searchTextField = NSTextField()
-        searchTextField.textColor = .white
-        searchTextField.backgroundColor = .clear
-        searchTextField.font = NSFont.systemFont(ofSize: 12)
-        searchTextField.placeholderString = "@cuenta"
-        searchTextField.translatesAutoresizingMaskIntoConstraints = false
-        searchInput.addSubview(searchTextField)
+        // Tab Views
+        let listenView = createListenView()
+        let recordView = createRecordView()
+        let downloadView = createDownloadView()
+        let youtubeView = createYouTubeView()
+        let archiveView = createArchiveView()
+        let linksView = createLinksView()
+        let historyView = createHistoryView()
+        let searchView = createSearchView()
+        let settingsView = createSettingsView()
+
+        tabViews = [listenView, recordView, downloadView, youtubeView, archiveView, linksView, historyView, searchView, settingsView]
+        
+        for (index, tabView) in tabViews.enumerated() {
+            tabView.isHidden = index != 1
+            tabView.frame = contentArea.bounds
+            tabView.autoresizingMask = [.width, .height]
+            contentArea.addSubview(tabView)
+        }
+        
+        mainWindow.center()
+        mainWindow.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    
+    @objc func switchTab(_ sender: NSButton) {
+        currentTab = sender.tag
+        
+        for (index, btn) in tabButtons.enumerated() {
+            if index == currentTab {
+                if index == 1 {
+                    btn.layer?.backgroundColor = NSColor(hex: "EF4444")!.withAlphaComponent(0.3).cgColor
+                } else {
+                    btn.layer?.backgroundColor = NSColor(hex: "3B82F6")!.withAlphaComponent(0.3).cgColor
+                }
+            } else {
+                btn.layer?.backgroundColor = NSColor.clear.cgColor
+            }
+        }
+        
+        for (index, tabView) in tabViews.enumerated() {
+            tabView.isHidden = index != currentTab
+        }
+    }
+    
+    // MARK: - Tab Views
+    
+    func createListenView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 16
+        stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
         
         NSLayoutConstraint.activate([
-            searchTextField.topAnchor.constraint(equalTo: searchInput.topAnchor, constant: 8),
-            searchTextField.leadingAnchor.constraint(equalTo: searchInput.leadingAnchor, constant: 10),
-            searchTextField.trailingAnchor.constraint(equalTo: searchInput.trailingAnchor, constant: -10),
-            searchTextField.bottomAnchor.constraint(equalTo: searchInput.bottomAnchor, constant: -8)
+            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
         ])
         
-        let searchBtn = NSButton(title: "Buscar", target: self, action: #selector(searchAction))
+        let icon = NSTextField(labelWithString: "🔊")
+        icon.font = NSFont.systemFont(ofSize: 48)
+        stack.addArrangedSubview(icon)
+        
+        let title = NSTextField(labelWithString: "Escuchar en Vivo")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+        
+        let desc = NSTextField(labelWithString: "Escucha el Space sin grabar")
+        desc.font = NSFont.systemFont(ofSize: 12)
+        desc.textColor = .gray
+        stack.addArrangedSubview(desc)
+        
+        let btn = createActionButton(title: "▶️  ESCUCHAR", color: "22C55E")
+        btn.target = self
+        btn.action = #selector(startListen)
+        stack.addArrangedSubview(btn)
+        
+        return container
+    }
+
+    func createRecordView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 16
+        stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        let icon = NSTextField(labelWithString: "🎙️")
+        icon.font = NSFont.systemFont(ofSize: 48)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "Grabar Space")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let desc = NSTextField(labelWithString: "Guarda el audio en vivo")
+        desc.font = NSFont.systemFont(ofSize: 11)
+        desc.textColor = .gray
+        desc.alignment = .center
+        stack.addArrangedSubview(desc)
+
+        let buttonStack = NSStackView()
+        buttonStack.orientation = .horizontal
+        buttonStack.spacing = 12
+        stack.addArrangedSubview(buttonStack)
+
+        let playBtn = NSButton(title: "▶️", target: self, action: #selector(startRecord))
+        playBtn.bezelStyle = .rounded
+        playBtn.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        playBtn.wantsLayer = true
+        playBtn.layer?.backgroundColor = NSColor(hex: "22C55E")!.cgColor
+        playBtn.setButtonType(.momentaryPushIn)
+        playBtn.isBordered = false
+        playBtn.layer?.cornerRadius = 30
+        playBtn.contentTintColor = .white
+        playBtn.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        playBtn.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        buttonStack.addArrangedSubview(playBtn)
+
+        let pauseBtn = NSButton(title: "⏸️", target: self, action: #selector(pauseRecord))
+        pauseBtn.bezelStyle = .rounded
+        pauseBtn.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        pauseBtn.wantsLayer = true
+        pauseBtn.layer?.backgroundColor = NSColor(hex: "F59E0B")!.cgColor
+        pauseBtn.setButtonType(.momentaryPushIn)
+        pauseBtn.isBordered = false
+        pauseBtn.layer?.cornerRadius = 30
+        pauseBtn.contentTintColor = .white
+        pauseBtn.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        pauseBtn.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        buttonStack.addArrangedSubview(pauseBtn)
+
+        let stopBtn = NSButton(title: "⏹️", target: self, action: #selector(stopAll))
+        stopBtn.bezelStyle = .rounded
+        stopBtn.font = NSFont.systemFont(ofSize: 20, weight: .bold)
+        stopBtn.wantsLayer = true
+        stopBtn.layer?.backgroundColor = NSColor(hex: "EF4444")!.cgColor
+        stopBtn.setButtonType(.momentaryPushIn)
+        stopBtn.isBordered = false
+        stopBtn.layer?.cornerRadius = 30
+        stopBtn.contentTintColor = .white
+        stopBtn.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        stopBtn.heightAnchor.constraint(equalToConstant: 60).isActive = true
+        buttonStack.addArrangedSubview(stopBtn)
+
+        return container
+    }
+
+    func createDownloadView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 16
+        stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        let icon = NSTextField(labelWithString: "📥")
+        icon.font = NSFont.systemFont(ofSize: 48)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "Descargar Space Terminado")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let desc = NSTextField(labelWithString: "Pega el link de un Space ya terminado")
+        desc.font = NSFont.systemFont(ofSize: 12)
+        desc.textColor = .gray
+        stack.addArrangedSubview(desc)
+
+        let buttonStack = NSStackView()
+        buttonStack.orientation = .horizontal
+        buttonStack.spacing = 12
+        stack.addArrangedSubview(buttonStack)
+
+        let downloadBtn = NSButton(title: "📥  DESCARGAR", target: self, action: #selector(downloadSpace))
+        downloadBtn.bezelStyle = .rounded
+        downloadBtn.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
+        downloadBtn.wantsLayer = true
+        downloadBtn.layer?.backgroundColor = NSColor(hex: "8B5CF6")!.cgColor
+        downloadBtn.setButtonType(.momentaryPushIn)
+        downloadBtn.isBordered = false
+        downloadBtn.layer?.cornerRadius = 12
+        downloadBtn.contentTintColor = .white
+        downloadBtn.heightAnchor.constraint(equalToConstant: 44).isActive = true
+        buttonStack.addArrangedSubview(downloadBtn)
+
+        let cancelBtn = NSButton(title: "⏹️", target: self, action: #selector(stopDownload))
+        cancelBtn.bezelStyle = .rounded
+        cancelBtn.font = NSFont.systemFont(ofSize: 16, weight: .bold)
+        cancelBtn.wantsLayer = true
+        cancelBtn.layer?.backgroundColor = NSColor(hex: "6B7280")!.cgColor
+        cancelBtn.setButtonType(.momentaryPushIn)
+        cancelBtn.isBordered = false
+        cancelBtn.layer?.cornerRadius = 12
+        cancelBtn.contentTintColor = .white
+        cancelBtn.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        buttonStack.addArrangedSubview(cancelBtn)
+
+        return container
+    }
+
+    func createYouTubeView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 16
+        stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        let icon = NSTextField(labelWithString: "📺")
+        icon.font = NSFont.systemFont(ofSize: 48)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "YouTube Live")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let btn = createActionButton(title: "📡  TRANSMITIR", color: "DC2626")
+        btn.target = self
+        btn.action = #selector(startYouTube)
+        stack.addArrangedSubview(btn)
+
+        return container
+    }
+
+    func createArchiveView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 16
+        stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: container.centerYAnchor)
+        ])
+
+        let icon = NSTextField(labelWithString: "🌐")
+        icon.font = NSFont.systemFont(ofSize: 48)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "Internet Archive")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let btn = createActionButton(title: "☁️  SUBIR", color: "3B82F6")
+        btn.target = self
+        btn.action = #selector(startArchive)
+        stack.addArrangedSubview(btn)
+
+        return container
+    }
+
+    func createLinksView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 14
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -20)
+        ])
+
+        let icon = NSTextField(labelWithString: "🔗")
+        icon.font = NSFont.systemFont(ofSize: 28)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "Links Guardados")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let addRow = NSStackView()
+        addRow.orientation = .horizontal
+        addRow.spacing = 10
+        stack.addArrangedSubview(addRow)
+
+        idField = NSTextField()
+        idField.textColor = .white
+        idField.backgroundColor = NSColor(white: 1, alpha: 0.08)
+        idField.font = NSFont.systemFont(ofSize: 12)
+        idField.placeholderString = "ID (ej: podcast-lunes)"
+        idField.bezelStyle = .roundedBezel
+        addRow.addArrangedSubview(idField)
+
+        let addBtn = NSButton(title: "+", target: self, action: #selector(addLink))
+        addBtn.bezelStyle = .rounded
+        addBtn.font = NSFont.systemFont(ofSize: 14, weight: .bold)
+        addBtn.wantsLayer = true
+        addBtn.layer?.backgroundColor = NSColor(hex: "22C55E")!.cgColor
+        addBtn.setButtonType(.momentaryPushIn)
+        addBtn.isBordered = false
+        addBtn.layer?.cornerRadius = 8
+        addBtn.contentTintColor = .white
+        addBtn.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        addRow.addArrangedSubview(addBtn)
+
+        let resultsContainer = NSView()
+        resultsContainer.wantsLayer = true
+        resultsContainer.layer?.backgroundColor = NSColor(white: 1, alpha: 0.05).cgColor
+        resultsContainer.layer?.cornerRadius = 8
+        stack.addArrangedSubview(resultsContainer)
+
+        let resultsTitle = NSTextField(labelWithString: "Links:")
+        resultsTitle.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        resultsTitle.textColor = .gray
+        resultsTitle.translatesAutoresizingMaskIntoConstraints = false
+        resultsContainer.addSubview(resultsTitle)
+
+        NSLayoutConstraint.activate([
+            resultsTitle.topAnchor.constraint(equalTo: resultsContainer.topAnchor, constant: 10),
+            resultsTitle.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12)
+        ])
+
+        linksStack = NSStackView()
+        linksStack.orientation = .vertical
+        linksStack.spacing = 6
+        linksStack.translatesAutoresizingMaskIntoConstraints = false
+        resultsContainer.addSubview(linksStack)
+
+        NSLayoutConstraint.activate([
+            linksStack.topAnchor.constraint(equalTo: resultsTitle.bottomAnchor, constant: 10),
+            linksStack.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12),
+            linksStack.trailingAnchor.constraint(equalTo: resultsContainer.trailingAnchor, constant: -12),
+            linksStack.bottomAnchor.constraint(equalTo: resultsContainer.bottomAnchor, constant: -10)
+        ])
+
+        loadSavedLinks()
+        updateLinksDisplay()
+
+        return container
+    }
+
+    func loadSavedLinks() {
+        if let data = UserDefaults.standard.data(forKey: "SavedLinks"),
+           let links = try? JSONDecoder().decode([[String: String]].self, from: data) {
+            savedLinks = links
+        }
+    }
+
+    func saveLinks() {
+        if let data = try? JSONEncoder().encode(savedLinks) {
+            UserDefaults.standard.set(data, forKey: "SavedLinks")
+        }
+    }
+
+    func updateLinksDisplay() {
+        for view in linksStack.arrangedSubviews {
+            linksStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        if savedLinks.isEmpty {
+            let emptyLabel = NSTextField(labelWithString: "Sin links guardados")
+            emptyLabel.font = NSFont.systemFont(ofSize: 12)
+            emptyLabel.textColor = .gray
+            linksStack.addArrangedSubview(emptyLabel)
+            return
+        }
+
+        for (index, link) in savedLinks.enumerated() {
+            let btn = NSButton(title: "\(link["id"] ?? "?"): \(link["url"] ?? "")", target: self, action: #selector(linkClicked(_:)))
+            btn.bezelStyle = .rounded
+            btn.font = NSFont.systemFont(ofSize: 11)
+            btn.contentTintColor = NSColor(hex: "60A5FA")!
+            btn.isBordered = false
+            btn.wantsLayer = true
+            btn.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+            btn.layer?.cornerRadius = 8
+            btn.tag = index
+            linksStack.addArrangedSubview(btn)
+        }
+    }
+
+    @objc func addLink() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space primero")
+            return
+        }
+        guard !idField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Ingresa un ID para el link")
+            return
+        }
+
+        let id = idField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let url = inputField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if !savedLinks.contains(where: { $0["id"] == id }) {
+            savedLinks.append(["id": id, "url": url])
+            saveLinks()
+            updateLinksDisplay()
+            print("🔗 [LINKS] Guardado: \(id) -> \(url)")
+            showAlert(title: "Guardado", message: "Link '\(id)' guardado")
+        } else {
+            showAlert(title: "Error", message: "El ID '\(id)' ya existe")
+        }
+    }
+
+    @objc func linkClicked(_ sender: NSButton) {
+        let index = sender.tag
+        guard index < savedLinks.count else { return }
+
+        let link = savedLinks[index]
+        inputField.stringValue = link["url"] ?? ""
+
+        sender.layer?.backgroundColor = NSColor(hex: "22C55E")!.withAlphaComponent(0.3).cgColor
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            sender.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+        }
+
+        print("🔗 [LINKS] Cargado: \(link["id"] ?? "") -> \(link["url"] ?? "")")
+        showAlert(title: "Link Cargado", message: link["url"] ?? "")
+    }
+
+    func createSearchView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 14
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+        
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -20)
+        ])
+        
+        let icon = NSTextField(labelWithString: "🔍")
+        icon.font = NSFont.systemFont(ofSize: 28)
+        stack.addArrangedSubview(icon)
+        
+        let title = NSTextField(labelWithString: "Buscar Spaces")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+        
+        let searchRow = NSStackView()
+        searchRow.orientation = .horizontal
+        searchRow.spacing = 10
+        stack.addArrangedSubview(searchRow)
+        
+        searchField = NSTextField()
+        searchField.textColor = NSColor(hex: "1F2937")!
+        searchField.backgroundColor = NSColor.white
+        searchField.font = NSFont.systemFont(ofSize: 13)
+        searchField.placeholderString = "@cuenta"
+        searchField.bezelStyle = .roundedBezel
+        searchRow.addArrangedSubview(searchField)
+        
+        let searchBtn = NSButton(title: "Buscar", target: self, action: #selector(performSearch))
         searchBtn.bezelStyle = .rounded
         searchBtn.font = NSFont.systemFont(ofSize: 12, weight: .medium)
         searchBtn.wantsLayer = true
@@ -191,14 +640,13 @@ class DesktopWindowController: NSObject, NSApplicationDelegate {
         searchBtn.layer?.cornerRadius = 8
         searchBtn.contentTintColor = .white
         searchBtn.widthAnchor.constraint(equalToConstant: 80).isActive = true
-        searchStack.addArrangedSubview(searchBtn)
+        searchRow.addArrangedSubview(searchBtn)
         
-        // Search Results
         let resultsContainer = NSView()
         resultsContainer.wantsLayer = true
-        resultsContainer.layer?.backgroundColor = NSColor(white: 1, alpha: 0.03).cgColor
+        resultsContainer.layer?.backgroundColor = NSColor(white: 1, alpha: 0.05).cgColor
         resultsContainer.layer?.cornerRadius = 8
-        mainStack.addArrangedSubview(resultsContainer)
+        stack.addArrangedSubview(resultsContainer)
         
         let resultsTitle = NSTextField(labelWithString: "Resultados:")
         resultsTitle.font = NSFont.systemFont(ofSize: 11, weight: .medium)
@@ -207,333 +655,470 @@ class DesktopWindowController: NSObject, NSApplicationDelegate {
         resultsContainer.addSubview(resultsTitle)
         
         NSLayoutConstraint.activate([
-            resultsTitle.topAnchor.constraint(equalTo: resultsContainer.topAnchor, constant: 8),
-            resultsTitle.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 10)
+            resultsTitle.topAnchor.constraint(equalTo: resultsContainer.topAnchor, constant: 10),
+            resultsTitle.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12)
         ])
         
         searchResultsStack = NSStackView()
         searchResultsStack.orientation = .vertical
-        searchResultsStack.spacing = 4
+        searchResultsStack.spacing = 6
         searchResultsStack.translatesAutoresizingMaskIntoConstraints = false
-        searchResultsStack.alignment = .leading
         resultsContainer.addSubview(searchResultsStack)
         
         NSLayoutConstraint.activate([
-            searchResultsStack.topAnchor.constraint(equalTo: resultsTitle.bottomAnchor, constant: 8),
-            searchResultsStack.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 10),
-            searchResultsStack.trailingAnchor.constraint(equalTo: resultsContainer.trailingAnchor, constant: -10),
-            searchResultsStack.bottomAnchor.constraint(equalTo: resultsContainer.bottomAnchor, constant: -8)
+            searchResultsStack.topAnchor.constraint(equalTo: resultsTitle.bottomAnchor, constant: 10),
+            searchResultsStack.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12),
+            searchResultsStack.trailingAnchor.constraint(equalTo: resultsContainer.trailingAnchor, constant: -12),
+            searchResultsStack.bottomAnchor.constraint(equalTo: resultsContainer.bottomAnchor, constant: -10)
         ])
         
-        let emptyLabel = NSTextField(labelWithString: "Busca @cuenta para ver sus Spaces")
-        emptyLabel.font = NSFont.systemFont(ofSize: 11)
+        let emptyLabel = NSTextField(labelWithString: "Escribe @cuenta y Busca")
+        emptyLabel.font = NSFont.systemFont(ofSize: 12)
         emptyLabel.textColor = .gray
         searchResultsStack.addArrangedSubview(emptyLabel)
         
-        // Volume Controls
-        let volumeStack = NSStackView()
-        volumeStack.orientation = .horizontal
-        volumeStack.spacing = 10
-        volumeStack.distribution = .fillEqually
-        mainStack.addArrangedSubview(volumeStack)
-        
-        let volUpBtn = createSecondaryButton(title: "🔊 Vol +", action: #selector(volumeUpAction))
-        let volDownBtn = createSecondaryButton(title: "🔉 Vol -", action: #selector(volumeDownAction))
-        let muteBtn = createSecondaryButton(title: "🔇 Mute", action: #selector(muteAction))
-        
-        volumeStack.addArrangedSubview(volUpBtn)
-        volumeStack.addArrangedSubview(volDownBtn)
-        volumeStack.addArrangedSubview(muteBtn)
-        
-        // History
-        let historyLabel = NSTextField(labelWithString: "📜 Historial reciente")
-        historyLabel.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
-        historyLabel.textColor = .gray
-        mainStack.addArrangedSubview(historyLabel)
-        
-        let history = getHistory()
-        if history.isEmpty {
-            let noHistory = NSTextField(labelWithString: "Sin historial - los links se guardaran aqui")
-            noHistory.font = NSFont.systemFont(ofSize: 11)
-            noHistory.textColor = .gray
-            mainStack.addArrangedSubview(noHistory)
-        } else {
-            let historyScroll = NSScrollView()
-            historyScroll.documentView = createHistoryList()
-            historyScroll.heightAnchor.constraint(equalToConstant: 100).isActive = true
-            mainStack.addArrangedSubview(historyScroll)
-        }
-        
-        mainWindow.center()
-        mainWindow.makeKeyAndOrderFront(nil)
+        return container
     }
     
-    func createMainButton(title: String, color: NSColor) -> NSButton {
-        let btn = NSButton(title: title, target: nil, action: nil)
-        btn.bezelStyle = .rounded
-        btn.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
-        btn.wantsLayer = true
-        btn.layer?.backgroundColor = color.cgColor
-        btn.setButtonType(.momentaryPushIn)
-        btn.isBordered = false
-        btn.layer?.cornerRadius = 10
-        btn.contentTintColor = .white
-        return btn
-    }
-    
-    func createSecondaryButton(title: String, action: Selector) -> NSButton {
-        let btn = NSButton(title: title, target: self, action: action)
-        btn.bezelStyle = .rounded
-        btn.font = NSFont.systemFont(ofSize: 11, weight: .medium)
-        btn.wantsLayer = true
-        btn.layer?.backgroundColor = NSColor(hex: "4B5563")!.cgColor
-        btn.setButtonType(.momentaryPushIn)
-        btn.isBordered = false
-        btn.layer?.cornerRadius = 8
-        btn.contentTintColor = .white
-        return btn
-    }
-    
-    func createHistoryList() -> NSView {
+    func createSettingsView() -> NSView {
+        let container = NSView()
         let stack = NSStackView()
         stack.orientation = .vertical
-        stack.spacing = 2
-        stack.alignment = .leading
+        stack.spacing = 20
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
         
-        let history = getHistory()
-        for (index, url) in history.prefix(10).enumerated() {
-            let btn = NSButton(title: url, target: self, action: #selector(historyItemClicked(_:)))
-            btn.bezelStyle = .inline
-            btn.font = NSFont.systemFont(ofSize: 10)
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20)
+        ])
+        
+        let icon = NSTextField(labelWithString: "⚙️")
+        icon.font = NSFont.systemFont(ofSize: 28)
+        stack.addArrangedSubview(icon)
+        
+        let title = NSTextField(labelWithString: "Configuracion")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+        
+        let pathLabel = NSTextField(labelWithString: "Carpeta de guardado:")
+        pathLabel.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        pathLabel.textColor = .gray
+        stack.addArrangedSubview(pathLabel)
+        
+        let pathRow = NSStackView()
+        pathRow.orientation = .horizontal
+        pathRow.spacing = 10
+        stack.addArrangedSubview(pathRow)
+        
+        pathField = NSTextField()
+        pathField.textColor = .white
+        pathField.backgroundColor = NSColor(white: 1, alpha: 0.08)
+        pathField.font = NSFont.systemFont(ofSize: 12)
+        pathField.placeholderString = "Seleccionar carpeta..."
+        pathField.stringValue = savePath
+        pathField.bezelStyle = .roundedBezel
+        pathRow.addArrangedSubview(pathField)
+        
+        let pathBtn = NSButton(title: "📁", target: self, action: #selector(selectPath))
+        pathBtn.bezelStyle = .rounded
+        pathBtn.wantsLayer = true
+        pathBtn.layer?.backgroundColor = NSColor(hex: "3B82F6")!.cgColor
+        pathBtn.setButtonType(.momentaryPushIn)
+        pathBtn.isBordered = false
+        pathBtn.layer?.cornerRadius = 8
+        pathBtn.contentTintColor = .white
+        pathBtn.widthAnchor.constraint(equalToConstant: 44).isActive = true
+        pathRow.addArrangedSubview(pathBtn)
+        
+        let saveBtn = NSButton(title: "💾  Guardar", target: self, action: #selector(saveSettings))
+        saveBtn.bezelStyle = .rounded
+        saveBtn.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        saveBtn.wantsLayer = true
+        saveBtn.layer?.backgroundColor = NSColor(hex: "22C55E")!.cgColor
+        saveBtn.setButtonType(.momentaryPushIn)
+        saveBtn.isBordered = false
+        saveBtn.layer?.cornerRadius = 10
+        saveBtn.contentTintColor = .white
+        saveBtn.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        stack.addArrangedSubview(saveBtn)
+        
+        return container
+    }
+
+    func createHistoryView() -> NSView {
+        let container = NSView()
+        let stack = NSStackView()
+        stack.orientation = .vertical
+        stack.spacing = 14
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            stack.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -20)
+        ])
+
+        let icon = NSTextField(labelWithString: "📜")
+        icon.font = NSFont.systemFont(ofSize: 28)
+        stack.addArrangedSubview(icon)
+
+        let title = NSTextField(labelWithString: "Historial (\(historyLimit) max)")
+        title.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
+        title.textColor = .white
+        stack.addArrangedSubview(title)
+
+        let resultsContainer = NSView()
+        resultsContainer.wantsLayer = true
+        resultsContainer.layer?.backgroundColor = NSColor(white: 1, alpha: 0.05).cgColor
+        resultsContainer.layer?.cornerRadius = 8
+        stack.addArrangedSubview(resultsContainer)
+
+        let resultsTitle = NSTextField(labelWithString: "Espacios grabados:")
+        resultsTitle.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        resultsTitle.textColor = .gray
+        resultsTitle.translatesAutoresizingMaskIntoConstraints = false
+        resultsContainer.addSubview(resultsTitle)
+
+        NSLayoutConstraint.activate([
+            resultsTitle.topAnchor.constraint(equalTo: resultsContainer.topAnchor, constant: 10),
+            resultsTitle.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12)
+        ])
+
+        historyStack = NSStackView()
+        historyStack.orientation = .vertical
+        historyStack.spacing = 6
+        historyStack.translatesAutoresizingMaskIntoConstraints = false
+        resultsContainer.addSubview(historyStack)
+
+        NSLayoutConstraint.activate([
+            historyStack.topAnchor.constraint(equalTo: resultsTitle.bottomAnchor, constant: 10),
+            historyStack.leadingAnchor.constraint(equalTo: resultsContainer.leadingAnchor, constant: 12),
+            historyStack.trailingAnchor.constraint(equalTo: resultsContainer.trailingAnchor, constant: -12),
+            historyStack.bottomAnchor.constraint(equalTo: resultsContainer.bottomAnchor, constant: -10)
+        ])
+
+        loadHistory()
+        updateHistoryDisplay()
+
+        return container
+    }
+
+    func loadHistory() {
+        if let data = UserDefaults.standard.data(forKey: "SpaceHistory"),
+           let h = try? JSONDecoder().decode([[String: String]].self, from: data) {
+            history = h
+        }
+    }
+
+    func saveHistory() {
+        if history.count > historyLimit {
+            history = Array(history.suffix(historyLimit))
+        }
+        if let data = try? JSONEncoder().encode(history) {
+            UserDefaults.standard.set(data, forKey: "SpaceHistory")
+        }
+    }
+
+    func addToHistory(spaceId: String, action: String) {
+        let entry: [String: String] = [
+            "id": spaceId,
+            "action": action,
+            "date": ISO8601DateFormatter().string(from: Date())
+        ]
+        if !history.contains(where: { $0["id"] == spaceId }) {
+            history.insert(entry, at: 0)
+            saveHistory()
+            print("📜 [HISTORY] Agregado: \(spaceId)")
+        }
+    }
+
+    func updateHistoryDisplay() {
+        for view in historyStack.arrangedSubviews {
+            historyStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        if history.isEmpty {
+            let emptyLabel = NSTextField(labelWithString: "Sin historial")
+            emptyLabel.font = NSFont.systemFont(ofSize: 12)
+            emptyLabel.textColor = .gray
+            historyStack.addArrangedSubview(emptyLabel)
+            return
+        }
+
+        for (index, entry) in history.enumerated() {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "HH:mm"
+            var dateStr = ""
+            if let dateStrVal = entry["date"], let date = ISO8601DateFormatter().date(from: dateStrVal) {
+                dateStr = dateFormatter.string(from: date)
+            }
+
+            let btn = NSButton(title: "[\(entry["action"] ?? "?") \(dateStr)] \(entry["id"] ?? "")", target: self, action: #selector(historyClicked(_:)))
+            btn.bezelStyle = .rounded
+            btn.font = NSFont.systemFont(ofSize: 11)
             btn.contentTintColor = NSColor(hex: "60A5FA")!
             btn.isBordered = false
+            btn.wantsLayer = true
+            btn.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+            btn.layer?.cornerRadius = 8
             btn.tag = index
-            stack.addArrangedSubview(btn)
-        }
-        
-        let clearBtn = NSButton(title: "🗑️ Limpiar historial", target: self, action: #selector(clearHistoryAction))
-        clearBtn.font = NSFont.systemFont(ofSize: 10)
-        clearBtn.contentTintColor = NSColor(hex: "F87171")!
-        clearBtn.isBordered = false
-        stack.addArrangedSubview(clearBtn)
-        
-        return stack
-    }
-    
-    @objc func mainButtonAction(_ sender: NSButton) {
-        guard !urlTextField.stringValue.isEmpty else {
-            showAlert(title: "Link requerido", message: "Pega el link del Space primero")
-            return
-        }
-        
-        switch sender.tag {
-        case 1: startListen(url: urlTextField.stringValue)
-        case 2: startRecord(url: urlTextField.stringValue)
-        case 3: startYouTube(url: urlTextField.stringValue)
-        case 4: startArchive(url: urlTextField.stringValue)
-        default: break
+            historyStack.addArrangedSubview(btn)
         }
     }
-    
-    @objc func stopAllAction() {
-        stopAll()
-    }
-    
-    @objc func searchAction() {
-        var query = searchTextField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        if query.hasPrefix("@") { query = String(query.dropFirst()) }
-        guard !query.isEmpty else {
-            showAlert(title: "Error", message: "Ingresa un nombre de cuenta")
-            return
-        }
-        
-        for view in searchResultsStack.arrangedSubviews {
-            searchResultsStack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-        
-        let searching = NSTextField(labelWithString: "Buscando @\(query)...")
-        searching.font = NSFont.systemFont(ofSize: 11)
-        searching.textColor = .white
-        searchResultsStack.addArrangedSubview(searching)
-        
-        let bashScript = """
-python3 << 'PYEOF'
-import json
-from datetime import datetime, timedelta
-import re
 
-query = "\(query)"
-now = datetime.now()
+    @objc func historyClicked(_ sender: NSButton) {
+        let index = sender.tag
+        guard index < history.count else { return }
 
-def extract_space_id(url):
-    m = re.search(r'x\\.com/i/spaces/([a-zA-Z0-9]+)', url)
-    return m.group(1) if m else None
+        let entry = history[index]
+        if let spaceId = entry["id"] {
+            inputField.stringValue = "https://x.com/i/spaces/\(spaceId)"
+        }
 
-tweets = [
-    {"title": "🔴 EN VIVO", "url": f"https://x.com/i/spaces/1lDxLlDddDWjM", "part": 150, "status": "live"},
-    {"title": "Space de @" + query, "url": f"https://x.com/i/spaces/1mnGdEqlDAGJv", "part": 89, "status": "ended"},
-    {"title": "Chat @" + query, "url": f"https://x.com/i/spaces/1jMKrngLNgZEq", "part": 234, "status": "ended"},
-    {"title": "Debate @" + query, "url": f"https://x.com/i/spaces/1AbCdEfGhIjK", "part": 512, "status": "ended"},
-]
-print(json.dumps({"success": True, "spaces": tweets}))
-PYEOF
-"""
-        
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", bashScript]
-        
-        do {
-            let output = Pipe()
-            task.standardOutput = output
-            try task.run()
-            task.waitUntilExit()
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            if let jsonStr = String(data: data, encoding: .utf8) {
-                parseSearchResults(jsonStr)
-            }
-        } catch {
-            showSearchError(error.localizedDescription)
-        }
-    }
-    
-    func parseSearchResults(_ json: String) {
-        for view in searchResultsStack.arrangedSubviews {
-            searchResultsStack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-        
-        let clean = json.components(separatedBy: "\n").joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let data = clean.data(using: .utf8),
-              let dict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let spaces = dict["spaces"] as? [[String: Any]] else {
-            showSearchError("Error al parsear")
-            return
-        }
-        
-        for space in spaces {
-            if let title = space["title"] as? String,
-               let url = space["url"] as? String,
-               let part = space["part"] as? Int {
-                let btn = NSButton(title: "\(title) (\(part) 👤)", target: self, action: #selector(selectSpace(_:)))
-                btn.bezelStyle = .rounded
-                btn.font = NSFont.systemFont(ofSize: 11)
-                btn.contentTintColor = NSColor(hex: "60A5FA")!
-                btn.isBordered = false
-                btn.wantsLayer = true
-                btn.layer?.backgroundColor = NSColor(white: 1, alpha: 0.05).cgColor
-                btn.layer?.cornerRadius = 6
-                btn.identifier = NSUserInterfaceItemIdentifier(url)
-                searchResultsStack.addArrangedSubview(btn)
-            }
-        }
-    }
-    
-    @objc func selectSpace(_ sender: NSButton) {
-        guard let url = sender.identifier?.rawValue else { return }
-        urlTextField.stringValue = url
-        urlText = url
         sender.layer?.backgroundColor = NSColor(hex: "22C55E")!.withAlphaComponent(0.3).cgColor
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            sender.layer?.backgroundColor = NSColor(white: 1, alpha: 0.05).cgColor
+            sender.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+        }
+
+        print("📜 [HISTORY] Cargado: \(entry["id"] ?? "")")
+    }
+
+    func createActionButton(title: String, color: String) -> NSButton {
+        let btn = NSButton(title: title, target: nil, action: nil)
+        btn.bezelStyle = .rounded
+        btn.font = NSFont.systemFont(ofSize: 14, weight: .semibold)
+        btn.wantsLayer = true
+        btn.layer?.backgroundColor = NSColor(hex: color)!.cgColor
+        btn.setButtonType(.momentaryPushIn)
+        btn.isBordered = false
+        btn.layer?.cornerRadius = 12
+        btn.contentTintColor = .white
+        btn.heightAnchor.constraint(equalToConstant: 48).isActive = true
+        return btn
+    }
+    
+    // MARK: - Actions
+    
+    @objc func selectPath() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.title = "Seleccionar carpeta de guardado"
+        
+        if panel.runModal() == .OK {
+            if let url = panel.url?.path {
+                savePath = url
+                pathField.stringValue = url
+                print("📁 [PATH] \(url)")
+            }
         }
     }
     
-    @objc func volumeUpAction() { adjustVolume(up: true) }
-    @objc func volumeDownAction() { adjustVolume(up: false) }
-    @objc func muteAction() { toggleMute() }
+    @objc func saveSettings() {
+        UserDefaults.standard.set(savePath, forKey: pathKey)
+        UserDefaults.standard.synchronize()
+        print("💾 [SETTINGS] \(savePath)")
+        showAlert(title: "Guardado", message: "Configuracion actualizada")
+    }
     
-    @objc func historyItemClicked(_ sender: NSButton) {
-        let history = getHistory()
-        if sender.tag < history.count {
-            urlTextField.stringValue = history[sender.tag]
-            urlText = history[sender.tag]
+    @objc func startListen() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space")
+            return
         }
-    }
-    
-    @objc func clearHistoryAction() {
-        UserDefaults.standard.removeObject(forKey: historyKey)
-        showAlert(title: "Listo", message: "Historial borrado")
-    }
-    
-    // Process methods
-    func startListen(url: String) {
-        guard !url.isEmpty else { return }
-        addToHistory(url: url)
-        startTime = Date()
+        print("🎵 [ESCUCHAR] \(inputField.stringValue)")
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --live '\(inputField.stringValue)' 2>&1 &"]
+        try? task.run()
+        
         startTimer()
-        updateStatus(true)
+        showAlert(title: "Escuchando", message: "Reproduciendo...")
+    }
+    
+    @objc func startRecord() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space")
+            return
+        }
+        
+        let mkTask = Process()
+        mkTask.executableURL = URL(fileURLWithPath: "/bin/bash")
+        mkTask.arguments = ["-c", "mkdir -p '\(savePath)'"]
+        try? mkTask.run()
+        
+        print("🎙️ [GRABAR] \(savePath)")
         
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --live '\(url)'"]
+        task.arguments = ["-c", "cd '\(scriptDir)' && ./xidexc-record --record '\(inputField.stringValue)' --dir '\(savePath)' 2>&1 &"]
         try? task.run()
-        listenProcess = task
+        
+        startTimer()
+        showAlert(title: "Grabando", message: "Guardando en: \(savePath)")
     }
     
-    func startRecord(url: String) {
-        guard !url.isEmpty else { return }
-        addToHistory(url: url)
-        updateStatus(true)
+    @objc func pauseRecord() {
+        print("⏸️ [PAUSA]")
+        showAlert(title: "Pausado", message: "Grabacion pausada")
+    }
+    
+    @objc func downloadSpace() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space terminado")
+            return
+        }
+        
+        let mkTask = Process()
+        mkTask.executableURL = URL(fileURLWithPath: "/bin/bash")
+        mkTask.arguments = ["-c", "mkdir -p '\(savePath)'"]
+        try? mkTask.run()
+        
+        print("📥 [DESCARGAR] \(inputField.stringValue)")
+        print("📁 [PATH] \(savePath)")
         
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --record '\(url)'"]
+        task.arguments = ["-c", "cd '\(scriptDir)' && ./xidexc-record --record '\(inputField.stringValue)' --dir '\(savePath)' 2>&1 &"]
         try? task.run()
-        recordProcess = task
+        
+        showAlert(title: "Descargando", message: "Space guardado en: \(savePath)")
     }
     
-    func startYouTube(url: String) {
-        guard !url.isEmpty else { return }
-        addToHistory(url: url)
-        updateStatus(true)
+    @objc func stopDownload() {
+        print("⏹️ [STOP DESCARGAR]")
         
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --restream '\(url)'"]
+        task.arguments = ["-c", "pkill -9 -f 'xidexc-record|yt-dlp' 2>/dev/null"]
         try? task.run()
-        youtubeProcess = task
-    }
-    
-    func startArchive(url: String) {
-        guard !url.isEmpty else { return }
-        addToHistory(url: url)
-        updateStatus(true)
-        
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --archive '\(url)'"]
-        try? task.run()
-        archiveProcess = task
-    }
-    
-    func stopAll() {
-        listenProcess?.terminate()
-        recordProcess?.terminate()
-        youtubeProcess?.terminate()
-        archiveProcess?.terminate()
-        
-        let killTask = Process()
-        killTask.executableURL = URL(fileURLWithPath: "/bin/bash")
-        killTask.arguments = ["-c", "pkill -9 -f 'xidexc-record|yt-dlp|mpv' 2>/dev/null"]
-        try? killTask.run()
-        
-        listenProcess = nil
-        recordProcess = nil
-        youtubeProcess = nil
-        archiveProcess = nil
         
         stopTimer()
-        updateStatus(false)
+        showAlert(title: "Detenido", message: "Descarga cancelada")
     }
     
-    func updateStatus(_ active: Bool) {
-        statusIndicator.textColor = active ? NSColor(hex: "22C55E")! : .systemRed
+    @objc func startYouTube() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space")
+            return
+        }
+        print("📺 [YOUTUBE] \(inputField.stringValue)")
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --restream '\(inputField.stringValue)' 2>&1 &"]
+        try? task.run()
+        
+        startTimer()
+        showAlert(title: "YouTube", message: "Retransmitiendo...")
+    }
+    
+    @objc func startArchive() {
+        guard !inputField.stringValue.isEmpty else {
+            showAlert(title: "Error", message: "Pega el link del Space")
+            return
+        }
+        print("🌐 [ARCHIVE] \(inputField.stringValue)")
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = ["-c", "cd \(scriptDir) && ./xidexc-record --archive '\(inputField.stringValue)' 2>&1 &"]
+        try? task.run()
+        
+        startTimer()
+        showAlert(title: "Archive", message: "Subiendo a Internet Archive...")
+    }
+    
+    @objc func stopAll() {
+        print("⏹️ [STOP]")
+        
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/bash")
+        task.arguments = ["-c", "pkill -9 -f 'xidexc-record|yt-dlp|mpv' 2>/dev/null"]
+        try? task.run()
+        
+        stopTimer()
+        showAlert(title: "Detenido", message: "Procesos finalizados")
+    }
+    
+    @objc func performSearch() {
+        let query = searchField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            print("❌ [BUSCAR] Query vacio")
+            return
+        }
+        
+        let cleanQuery = query.hasPrefix("@") ? String(query.dropFirst()) : query
+        print("🔍 [BUSCAR] @\(cleanQuery)")
+        
+        for view in searchResultsStack.arrangedSubviews {
+            searchResultsStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        
+        let searching = NSTextField(labelWithString: "Buscando @\(cleanQuery)...")
+        searching.font = NSFont.systemFont(ofSize: 12)
+        searching.textColor = .gray
+        searchResultsStack.addArrangedSubview(searching)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.showSearchResults(for: cleanQuery)
+        }
+    }
+    
+    func showSearchResults(for query: String) {
+        for view in searchResultsStack.arrangedSubviews {
+            searchResultsStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        
+        let mockSpaces = [
+            ("🔴 EN VIVO", "https://x.com/i/spaces/1lDxLlDddDWjM", 150),
+            ("Space de @" + query, "https://x.com/i/spaces/1mnGdEqlDAGJv", 89),
+            ("Chat @" + query, "https://x.com/i/spaces/1jMKrngLNgZEq", 234),
+            ("Debate @" + query, "https://x.com/i/spaces/1AbCdEfGhIjK", 512)
+        ]
+        
+        for (title, url, participants) in mockSpaces {
+            let btn = NSButton(title: "\(title) (\(participants) 👤)", target: self, action: #selector(spaceClicked(_:)))
+            btn.bezelStyle = .rounded
+            btn.font = NSFont.systemFont(ofSize: 12)
+            btn.contentTintColor = NSColor(hex: "60A5FA")!
+            btn.isBordered = false
+            btn.wantsLayer = true
+            btn.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+            btn.layer?.cornerRadius = 8
+            btn.identifier = NSUserInterfaceItemIdentifier(url)
+            searchResultsStack.addArrangedSubview(btn)
+        }
+        
+        print("✅ [RESULTADOS] \(mockSpaces.count) espacios de @\(query)")
+    }
+    
+    @objc func spaceClicked(_ sender: NSButton) {
+        guard let url = sender.identifier?.rawValue else { return }
+        print("👆 [CLICK] \(url)")
+        
+        inputField.stringValue = url
+        
+        sender.layer?.backgroundColor = NSColor(hex: "22C55E")!.withAlphaComponent(0.3).cgColor
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            sender.layer?.backgroundColor = NSColor(white: 1, alpha: 0.08).cgColor
+        }
+        
+        showAlert(title: "Space Seleccionado", message: url)
     }
     
     func startTimer() {
-        timer?.invalidate()
+        startTime = Date()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateTimer()
         }
@@ -542,8 +1127,8 @@ PYEOF
     func stopTimer() {
         timer?.invalidate()
         timer = nil
-        elapsedTime = "00:00:00"
-        timerLabel.stringValue = elapsedTime
+        startTime = nil
+        timerLabel.stringValue = "00:00:00"
     }
     
     func updateTimer() {
@@ -552,35 +1137,7 @@ PYEOF
         let h = elapsed / 3600
         let m = (elapsed % 3600) / 60
         let s = elapsed % 60
-        elapsedTime = String(format: "%02d:%02d:%02d", h, m, s)
-        timerLabel.stringValue = elapsedTime
-    }
-    
-    func adjustVolume(up: Bool) {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        let dir = up ? "+" : "-"
-        task.arguments = ["-c", "osascript -e 'set volume output volume ((output volume of (get volume settings)) \(dir) 10)'"]
-        try? task.run()
-    }
-    
-    func toggleMute() {
-        let task = Process()
-        task.executableURL = URL(fileURLWithPath: "/bin/bash")
-        task.arguments = ["-c", "osascript -e 'set mute output muted to not output muted of (get volume settings)'"]
-        try? task.run()
-    }
-    
-    func addToHistory(url: String) {
-        var history = getHistory()
-        history.removeAll { $0 == url }
-        history.insert(url, at: 0)
-        if history.count > maxHistory { history = Array(history.prefix(maxHistory)) }
-        UserDefaults.standard.set(history, forKey: historyKey)
-    }
-    
-    func getHistory() -> [String] {
-        UserDefaults.standard.stringArray(forKey: historyKey) ?? []
+        timerLabel.stringValue = String(format: "%02d:%02d:%02d", h, m, s)
     }
     
     func showAlert(title: String, message: String) {
@@ -589,23 +1146,6 @@ PYEOF
         alert.informativeText = message
         alert.addButton(withTitle: "OK")
         alert.runModal()
-    }
-    
-    func showSearchError(_ msg: String) {
-        for view in searchResultsStack.arrangedSubviews {
-            searchResultsStack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-        let err = NSTextField(labelWithString: "Error: \(msg)")
-        err.font = NSFont.systemFont(ofSize: 11)
-        err.textColor = NSColor(hex: "EF4444")!
-        searchResultsStack.addArrangedSubview(err)
-    }
-}
-
-extension DesktopWindowController: NSTextFieldDelegate {
-    func controlTextDidChange(_ obj: Notification) {
-        urlText = urlTextField.stringValue
     }
 }
 
@@ -621,11 +1161,9 @@ extension NSColor {
     }
 }
 
-// Main
 let app = NSApplication.shared
 app.setActivationPolicy(.regular)
 
-let delegate = DesktopWindowController()
+let delegate = AppDelegate()
 app.delegate = delegate
-app.activate(ignoringOtherApps: true)
 app.run()
