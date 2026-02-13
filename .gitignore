@@ -1,0 +1,25 @@
+# Build artifacts
+*.app/
+*.dylib
+*.o
+
+# Xcode build
+XSpaceBar-Swift/.build/
+XSpaceBar-Swift/*.xcodeproj/
+XSpaceBar-Desktop/*.app/
+
+# macOS
+.DS_Store
+*.swp
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Optional recording files
+*.m4a
+*.mp3
+*.wav
