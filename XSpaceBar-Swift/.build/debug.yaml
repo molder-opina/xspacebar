@@ -1,0 +1,81 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "XSpaceBar-arm64-apple-macosx26.0-debug.exe": ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe>"]
+  "XSpaceBar-arm64-apple-macosx26.0-debug.module": ["<XSpaceBar-arm64-apple-macosx26.0-debug.module>"]
+  "main": ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe>","<XSpaceBar-arm64-apple-macosx26.0-debug.module>"]
+  "test": ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe>","<XSpaceBar-arm64-apple-macosx26.0-debug.module>"]
+default: "main"
+nodes:
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/XSpaceBar/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar":
+    is-mutated: true
+commands:
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar-entitlement.plist"]
+    description: "Write auxiliary file /Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar-entitlement.plist"
+
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/XSpaceBar/main.swift"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/sources"]
+    description: "Write auxiliary file /Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/sources"
+
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swift.o"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.product/Objects.LinkFileList"
+
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<XSpaceBar-arm64-apple-macosx26.0-debug.exe>":
+    tool: phony
+    inputs: ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    outputs: ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe>"]
+
+  "<XSpaceBar-arm64-apple-macosx26.0-debug.module>":
+    tool: phony
+    inputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swift.o","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/Modules/XSpaceBar.swiftmodule"]
+    outputs: ["<XSpaceBar-arm64-apple-macosx26.0-debug.module>"]
+
+  "C.XSpaceBar-arm64-apple-macosx26.0-debug.exe":
+    tool: shell
+    inputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swift.o","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.product/Objects.LinkFileList"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/XSpaceBar"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug","-o","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar","-module-name","XSpaceBar","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_XSpaceBar_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Library/Developer/CommandLineTools/usr/lib/swift-5.5/macosx","-Xlinker","-rpath","-Xlinker","/Library/Developer/CommandLineTools/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx10.15","-Xlinker","-add_ast_path","-Xlinker","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/Modules/XSpaceBar.swiftmodule","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.XSpaceBar-arm64-apple-macosx26.0-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar-entitlement.plist"]
+    outputs: ["<XSpaceBar-arm64-apple-macosx26.0-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/XSpaceBar"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar-entitlement.plist","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar"]
+
+  "C.XSpaceBar-arm64-apple-macosx26.0-debug.module":
+    tool: shell
+    inputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/XSpaceBar/main.swift","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/sources"]
+    outputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swift.o","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/Modules/XSpaceBar.swiftmodule"]
+    description: "Compiling Swift Module 'XSpaceBar' (1 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","XSpaceBar","-emit-dependencies","-emit-module","-emit-module-path","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/Modules/XSpaceBar.swiftmodule","-output-file-map","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/output-file-map.json","-incremental","-c","@/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/sources","-I","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx10.15","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","XSpaceBar_main","-parse-as-library","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/XSpaceBar/","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Package.swift","/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+

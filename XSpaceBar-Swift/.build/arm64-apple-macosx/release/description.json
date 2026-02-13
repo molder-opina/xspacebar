@@ -1,0 +1,213 @@
+{
+  "builtTestProducts" : [
+
+  ],
+  "copyCommands" : {
+
+  },
+  "explicitTargetDependencyImportCheckingMode" : {
+    "none" : {
+
+    }
+  },
+  "generatedSourceTargetSet" : [
+
+  ],
+  "pluginDescriptions" : [
+
+  ],
+  "swiftCommands" : {
+    "C.XSpaceBar-arm64-apple-macosx26.0-release.module" : {
+      "executable" : "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "fileList" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/sources",
+      "importPath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/Modules",
+      "inputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/main.swift"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/sources"
+        }
+      ],
+      "isLibrary" : false,
+      "moduleName" : "XSpaceBar",
+      "moduleOutputPath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/Modules/XSpaceBar.swiftmodule",
+      "objects" : [
+        "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/main.swift.o"
+      ],
+      "otherArguments" : [
+        "-target",
+        "arm64-apple-macosx10.15",
+        "-whole-module-optimization",
+        "-num-threads",
+        "10",
+        "-serialize-diagnostics",
+        "-O",
+        "-j10",
+        "-DSWIFT_PACKAGE",
+        "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+        "-module-cache-path",
+        "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/ModuleCache",
+        "-parseable-output",
+        "-Xfrontend",
+        "-entry-point-function-name",
+        "-Xfrontend",
+        "XSpaceBar_main",
+        "-swift-version",
+        "5",
+        "-I",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-L",
+        "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+        "-plugin-path",
+        "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+        "-sdk",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-g",
+        "-Xcc",
+        "-isysroot",
+        "-Xcc",
+        "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+        "-Xcc",
+        "-fPIC",
+        "-Xcc",
+        "-g"
+      ],
+      "outputFileMapPath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/output-file-map.json",
+      "outputs" : [
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/main.swift.o"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/Modules/XSpaceBar.swiftmodule"
+        }
+      ],
+      "prepareForIndexing" : false,
+      "sources" : [
+        "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/main.swift"
+      ],
+      "tempsPath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build",
+      "wholeModuleOptimization" : true
+    }
+  },
+  "swiftFrontendCommands" : {
+
+  },
+  "swiftTargetScanArgs" : {
+    "XSpaceBar" : [
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc",
+      "-module-name",
+      "XSpaceBar",
+      "-c",
+      "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/main.swift",
+      "-I",
+      "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/Modules",
+      "-target",
+      "arm64-apple-macosx10.15",
+      "-whole-module-optimization",
+      "-num-threads",
+      "10",
+      "-serialize-diagnostics",
+      "-O",
+      "-j10",
+      "-DSWIFT_PACKAGE",
+      "-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE",
+      "-module-cache-path",
+      "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/ModuleCache",
+      "-parseable-output",
+      "-Xfrontend",
+      "-entry-point-function-name",
+      "-Xfrontend",
+      "XSpaceBar_main",
+      "-swift-version",
+      "5",
+      "-I",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-L",
+      "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
+      "-plugin-path",
+      "/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing",
+      "-sdk",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-g",
+      "-Xcc",
+      "-isysroot",
+      "-Xcc",
+      "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk",
+      "-Xcc",
+      "-fPIC",
+      "-Xcc",
+      "-g",
+      "-driver-use-frontend-path",
+      "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+    ]
+  },
+  "targetDependencyMap" : {
+    "XSpaceBar" : [
+
+    ]
+  },
+  "testDiscoveryCommands" : {
+
+  },
+  "testEntryPointCommands" : {
+
+  },
+  "traitConfiguration" : {
+    "default" : {
+
+    }
+  },
+  "writeCommands" : {
+    "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/sources" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/main.swift"
+        }
+      ],
+      "outputFilePath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/sources"
+    },
+    "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.product/Objects.LinkFileList" : {
+      "alwaysOutOfDate" : false,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<link-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.build/main.swift.o"
+        }
+      ],
+      "outputFilePath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar.product/Objects.LinkFileList"
+    },
+    "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt" : {
+      "alwaysOutOfDate" : true,
+      "inputs" : [
+        {
+          "kind" : "virtual",
+          "name" : "<swift-get-version>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Library/Developer/CommandLineTools/usr/bin/swiftc"
+        }
+      ],
+      "outputFilePath" : "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/swift-version--1AB21518FC5DEDBE.txt"
+    }
+  }
+}

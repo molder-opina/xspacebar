@@ -1,0 +1,65 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/release/XSpaceBar'
+relocations:
+  - { offset: 0xEFB7F, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar3appSo13NSApplicationCvp', symObjAddr: 0x24168, symBinAddr: 0x1000159F0, symSize: 0x0 }
+  - { offset: 0xEFB9A, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar8delegateAA11AppDelegateCvp', symObjAddr: 0x24170, symBinAddr: 0x1000159F8, symSize: 0x0 }
+  - { offset: 0xEFEF3, size: 0x8, addend: 0x0, symName: _XSpaceBar_main, symObjAddr: 0x0, symBinAddr: 0x100002094, symSize: 0x9C }
+  - { offset: 0xEFF28, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateCMa', symObjAddr: 0x9C, symBinAddr: 0x100002130, symSize: 0x20 }
+  - { offset: 0xF0391, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateCfETo', symObjAddr: 0x1C34, symBinAddr: 0x100003CC8, symSize: 0xB4 }
+  - { offset: 0xF03C0, size: 0x8, addend: 0x0, symName: '_$sSo7NSColorC9XSpaceBarE3hexABSgSS_tcfC', symObjAddr: 0x1F44, symBinAddr: 0x100003FD8, symSize: 0x268 }
+  - { offset: 0xF06D9, size: 0x8, addend: 0x0, symName: '_$sIeg_IeyB_TR', symObjAddr: 0x5D0C, symBinAddr: 0x100007DA0, symSize: 0x2C }
+  - { offset: 0xF0733, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerCfETo', symObjAddr: 0x6320, symBinAddr: 0x1000083B4, symSize: 0x58 }
+  - { offset: 0xF0762, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerCMa', symObjAddr: 0x6378, symBinAddr: 0x10000840C, symSize: 0x20 }
+  - { offset: 0xF0776, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC20controlTextDidChangeyy10Foundation12NotificationVF', symObjAddr: 0x6398, symBinAddr: 0x10000842C, symSize: 0xA4 }
+  - { offset: 0xF082F, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC20controlTextDidChangeyy10Foundation12NotificationVFTo', symObjAddr: 0x643C, symBinAddr: 0x1000084D0, symSize: 0xA0 }
+  - { offset: 0xF088D, size: 0x8, addend: 0x0, symName: '_$ss17_NativeDictionaryV8setValue_6forKey8isUniqueyq_n_xSbtFSS_SSTg5', symObjAddr: 0x655C, symBinAddr: 0x1000085F0, symSize: 0x164 }
+  - { offset: 0xF0963, size: 0x8, addend: 0x0, symName: '_$ss22__RawDictionaryStorageC4findys10_HashTableV6BucketV6bucket_Sb5foundtxSHRzlFSS_Tg5', symObjAddr: 0x66C0, symBinAddr: 0x100008754, symSize: 0x64 }
+  - { offset: 0xF09A6, size: 0x8, addend: 0x0, symName: '_$ss22__RawDictionaryStorageC4find_9hashValues10_HashTableV6BucketV6bucket_Sb5foundtx_SitSHRzlFSS_Tg5', symObjAddr: 0x6724, symBinAddr: 0x1000087B8, symSize: 0xB4 }
+  - { offset: 0xF0A08, size: 0x8, addend: 0x0, symName: '_$ss17_NativeDictionaryV4copyyyFSS_SSTg5', symObjAddr: 0x67D8, symBinAddr: 0x10000886C, symSize: 0x174 }
+  - { offset: 0xF0ACE, size: 0x8, addend: 0x0, symName: '_$ss17_NativeDictionaryV20_copyOrMoveAndResize8capacity12moveElementsySi_SbtFSS_SSTg5', symObjAddr: 0x694C, symBinAddr: 0x1000089E0, symSize: 0x2BC }
+  - { offset: 0xF0BEC, size: 0x8, addend: 0x0, symName: '_$ss12_ArrayBufferV20_consumeAndCreateNew14bufferIsUnique15minimumCapacity13growForAppendAByxGSb_SiSbtFSo8NSButtonC_Tg5', symObjAddr: 0x6C08, symBinAddr: 0x100008C9C, symSize: 0x128 }
+  - { offset: 0xF0D1A, size: 0x8, addend: 0x0, symName: '_$ss22_ContiguousArrayBufferV19_uninitializedCount15minimumCapacityAByxGSi_SitcfCSo8NSButtonC_Tt1g5', symObjAddr: 0x6D30, symBinAddr: 0x100008DC4, symSize: 0xA0 }
+  - { offset: 0xF0D92, size: 0x8, addend: 0x0, symName: '_$ss12_ArrayBufferV13_copyContents8subRange12initializingSpyxGSnySiG_AFtFSo8NSButtonC_Tg5', symObjAddr: 0x6DD0, symBinAddr: 0x100008E64, symSize: 0x118 }
+  - { offset: 0xF0E72, size: 0x8, addend: 0x0, symName: ___swift_instantiateConcreteTypeFromMangledNameV2, symObjAddr: 0x721C, symBinAddr: 0x1000092B0, symSize: 0x44 }
+  - { offset: 0xF0E86, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC13controlActionyySo8NSButtonCFyyScMYccfU_TA', symObjAddr: 0x7284, symBinAddr: 0x100009318, symSize: 0x120 }
+  - { offset: 0xF0F5F, size: 0x8, addend: 0x0, symName: _block_copy_helper, symObjAddr: 0x73A4, symBinAddr: 0x100009438, symSize: 0x10 }
+  - { offset: 0xF0F73, size: 0x8, addend: 0x0, symName: _block_destroy_helper, symObjAddr: 0x73B4, symBinAddr: 0x100009448, symSize: 0x8 }
+  - { offset: 0xF0F87, size: 0x8, addend: 0x0, symName: '_$s8Dispatch0A13WorkItemFlagsVACs10SetAlgebraAAWl', symObjAddr: 0x73BC, symBinAddr: 0x100009450, symSize: 0x44 }
+  - { offset: 0xF0F9B, size: 0x8, addend: 0x0, symName: '_$sSay8Dispatch0A13WorkItemFlagsVGSayxGSTsWl', symObjAddr: 0x7400, symBinAddr: 0x100009494, symSize: 0x50 }
+  - { offset: 0xF0FAF, size: 0x8, addend: 0x0, symName: ___swift_instantiateConcreteTypeFromMangledNameAbstractV2, symObjAddr: 0x7450, symBinAddr: 0x1000094E4, symSize: 0x44 }
+  - { offset: 0xF0FC3, size: 0x8, addend: 0x0, symName: ___swift_project_boxed_opaque_existential_0, symObjAddr: 0x7494, symBinAddr: 0x100009528, symSize: 0x24 }
+  - { offset: 0xF0FD7, size: 0x8, addend: 0x0, symName: ___swift_destroy_boxed_opaque_existential_0, symObjAddr: 0x74B8, symBinAddr: 0x10000954C, symSize: 0x20 }
+  - { offset: 0xF0FEB, size: 0x8, addend: 0x0, symName: '_$sS2SSysWl', symObjAddr: 0x7518, symBinAddr: 0x1000095AC, symSize: 0x40 }
+  - { offset: 0xF1376, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC29applicationDidFinishLaunchingyy10Foundation12NotificationVFTo', symObjAddr: 0xBC, symBinAddr: 0x100002150, symSize: 0xA4 }
+  - { offset: 0xF1785, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC15setupStatusItemyyF', symObjAddr: 0x160, symBinAddr: 0x1000021F4, symSize: 0x17C }
+  - { offset: 0xF18BC, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC21updateStatusItemColoryyF', symObjAddr: 0x2DC, symBinAddr: 0x100002370, symSize: 0x11C }
+  - { offset: 0xF1AA2, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC12setupPopoveryyF', symObjAddr: 0x3F8, symBinAddr: 0x10000248C, symSize: 0x180 }
+  - { offset: 0xF1B9B, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC13togglePopoveryyF', symObjAddr: 0x578, symBinAddr: 0x10000260C, symSize: 0x104 }
+  - { offset: 0xF1C77, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC13togglePopoveryyFTo', symObjAddr: 0x67C, symBinAddr: 0x100002710, symSize: 0x28 }
+  - { offset: 0xF1CD8, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC18pasteFromClipboardyyF', symObjAddr: 0x6A4, symBinAddr: 0x100002738, symSize: 0x1AC }
+  - { offset: 0xF1EE4, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC11startListen3urlySS_tF', symObjAddr: 0x850, symBinAddr: 0x1000028E4, symSize: 0x7A4 }
+  - { offset: 0xF2487, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC11startRecord3urlySS_tF', symObjAddr: 0x1000, symBinAddr: 0x100003094, symSize: 0x360 }
+  - { offset: 0xF2677, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC13createProcess33_C653EDC64C8042D3BF8D31736CE31601LL4argsSo6NSTaskCSaySSG_tF', symObjAddr: 0x1800, symBinAddr: 0x100003894, symSize: 0x318 }
+  - { offset: 0xF27EB, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateCACycfc', symObjAddr: 0x1B18, symBinAddr: 0x100003BAC, symSize: 0xF0 }
+  - { offset: 0xF281D, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateCACycfcTo', symObjAddr: 0x1C08, symBinAddr: 0x100003C9C, symSize: 0x20 }
+  - { offset: 0xF2845, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC5coderACSgSo7NSCoderC_tcfcTo', symObjAddr: 0x1CE8, symBinAddr: 0x100003D7C, symSize: 0xAC }
+  - { offset: 0xF28B3, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC04loadD0yyF', symObjAddr: 0x1D94, symBinAddr: 0x100003E28, symSize: 0x1B0 }
+  - { offset: 0xF294A, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC04loadD0yyFTo', symObjAddr: 0x21AC, symBinAddr: 0x100004240, symSize: 0x28 }
+  - { offset: 0xF2A5C, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC7setupUIyyF', symObjAddr: 0x21D4, symBinAddr: 0x100004268, symSize: 0x1060 }
+  - { offset: 0xF324D, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC012createListenD0So6NSViewCyF', symObjAddr: 0x3234, symBinAddr: 0x1000052C8, symSize: 0x698 }
+  - { offset: 0xF347E, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC012createRecordD0So6NSViewCyF', symObjAddr: 0x38CC, symBinAddr: 0x100005960, symSize: 0x694 }
+  - { offset: 0xF36A9, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC013createYoutubeD0So6NSViewCyF', symObjAddr: 0x3F60, symBinAddr: 0x100005FF4, symSize: 0x63C }
+  - { offset: 0xF38BC, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC013createArchiveD0So6NSViewCyF', symObjAddr: 0x459C, symBinAddr: 0x100006630, symSize: 0x638 }
+  - { offset: 0xF3AE3, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC19createControlButton5title5color3tagSo8NSButtonCSS_So7NSColorCSitF', symObjAddr: 0x4BD4, symBinAddr: 0x100006C68, symSize: 0x278 }
+  - { offset: 0xF3BC8, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC9switchTabyySo8NSButtonCFTo', symObjAddr: 0x4E4C, symBinAddr: 0x100006EE0, symSize: 0x68 }
+  - { offset: 0xF3C3B, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC16updateTabButtonsyyF', symObjAddr: 0x4EB4, symBinAddr: 0x100006F48, symSize: 0x2EC }
+  - { offset: 0xF3F74, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC11pasteActionyyFTo', symObjAddr: 0x51A0, symBinAddr: 0x100007234, symSize: 0x5C }
+  - { offset: 0xF3FFF, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC13controlActionyySo8NSButtonCF', symObjAddr: 0x51FC, symBinAddr: 0x100007290, symSize: 0xB10 }
+  - { offset: 0xF4715, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC13controlActionyySo8NSButtonCFTo', symObjAddr: 0x5D38, symBinAddr: 0x100007DCC, symSize: 0x50 }
+  - { offset: 0xF4730, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC18updateButtonStatesyyF', symObjAddr: 0x5D88, symBinAddr: 0x100007E1C, symSize: 0x29C }
+  - { offset: 0xF4A44, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC20updateTabButtonState8tabIndex8isActiveySi_SbtF', symObjAddr: 0x6024, symBinAddr: 0x1000080B8, symSize: 0x294 }
+  - { offset: 0xF4C07, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC7nibName6bundleACSSSg_So8NSBundleCSgtcfcTo', symObjAddr: 0x62B8, symBinAddr: 0x10000834C, symSize: 0x2C }
+  - { offset: 0xF4CBE, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar18MainViewControllerC21startPulsingAnimationyySo6NSViewCFTf4nd_n', symObjAddr: 0x70A4, symBinAddr: 0x100009138, symSize: 0x178 }
+  - { offset: 0xF4D44, size: 0x8, addend: 0x0, symName: '_$s9XSpaceBar11AppDelegateC11killProcess33_C653EDC64C8042D3BF8D31736CE31601LL7patternySS_tFTf4nd_n', symObjAddr: 0x7558, symBinAddr: 0x1000095EC, symSize: 0x26C }
+...

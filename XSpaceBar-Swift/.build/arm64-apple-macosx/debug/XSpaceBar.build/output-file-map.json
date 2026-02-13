@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/master.swiftdeps"
+  },
+  "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/Sources/XSpaceBar/main.swift": {
+    "dependencies": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.d",
+    "object": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swift.o",
+    "swiftmodule": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main~partial.swiftmodule",
+    "swift-dependencies": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.swiftdeps",
+    "diagnostics": "/Users/molder/projects/github-molder/spaces/XSpaceBar-Swift/.build/arm64-apple-macosx/debug/XSpaceBar.build/main.dia"
+  }
+}
